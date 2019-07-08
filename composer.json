@@ -1,5 +1,5 @@
 {
-  "name": "chan/rev-fork",
+  "name": "chan-ro/rev-fork",
   "description": "Review WebAPI forked from vue storefront api",
   "type": "magento2-module",
   "authors": [
