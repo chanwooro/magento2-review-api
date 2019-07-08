@@ -1,6 +1,6 @@
 {
-  "name": "divante/magento2-review-api",
-  "description": "Review WebAPI",
+  "name": "chan/rev-fork",
+  "description": "Review WebAPI forked from vue storefront api",
   "type": "magento2-module",
   "authors": [
     {
