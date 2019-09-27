@@ -4,8 +4,8 @@ This module implement WebAPI for product reviews (partially)
 
 Module allow:
 - Get one review 
-- Create review (without ratings)
-- Update review (without ratings)
+- Create review with ratings
+- Update review with ratings
 - Search reviews
 - Get product reviews
 
@@ -18,12 +18,14 @@ Module allow:
 | /V1/reviews/ | GET |  Search reviews |
 | /V1/products/:sku/reviews | GET | Get product reviews |
 
+[Docs for adding a new review with ratings](docs/api-specs.md)
+
 ### Install
 
 To install this module please use composer dependency manager. In Your Magento2 folder please do execute:
 
 ```bash
-config repositories.divante vcs https://github.com/DivanteLtd/magento2-review-api.git
+composer config repositories.divante-review vcs https://github.com/DivanteLtd/magento2-review-api.git
 composer require divante/magento2-review-api:dev-master
 php bin/magento setup:upgrade 
 ```
@@ -31,5 +33,3 @@ php bin/magento setup:upgrade
 ### Compatibility
 Module was tested on Magento 2.2.0
 
-### TODO
-Create/Save full review (with ratings)

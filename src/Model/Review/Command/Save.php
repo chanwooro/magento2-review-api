@@ -13,15 +13,14 @@ use Divante\ReviewApi\Model\Converter\Review\ToDataModel;
 use Magento\Review\Model\ResourceModel\Review as ReviewResource;
 use Divante\ReviewApi\Validation\ValidationException;
 use Divante\ReviewApi\Model\ReviewValidatorInterface;
-use \Magento\Store\Model\StoreManagerInterface;
-use \Magento\Review\Model\RatingFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Divante\ReviewApi\Model\Review\Rating\SaveHandler;
 
 /**
  * Class Save
  */
 class Save implements SaveInterface
 {
-
     /**
      * @var ToModel
      */
@@ -48,11 +47,9 @@ class Save implements SaveInterface
     private $storeManager;
 
     /**
-     * Rating resource model
-     *
-     * @var RatingFactory
+     * @var SaveHandler
      */
-    private $ratingFactory;
+    private $ratingSaveHandler;
 
     /**
      * Save constructor.
@@ -62,6 +59,7 @@ class Save implements SaveInterface
      * @param ToDataModel $toDataModelConvert
      * @param StoreManagerInterface $storeManager
      * @param ReviewResource $reviewResource
+     * @param SaveHandler $ratingSaveHandler
      */
     public function __construct(
         ReviewValidatorInterface $reviewValidator,
@@ -69,18 +67,20 @@ class Save implements SaveInterface
         ToDataModel $toDataModelConvert,
         StoreManagerInterface $storeManager,
         ReviewResource $reviewResource,
-        RatingFactory $ratingFactory
+        SaveHandler $ratingSaveHandler
     ) {
         $this->reviewValidator = $reviewValidator;
         $this->toDataModelConverter = $toDataModelConvert;
         $this->toModelConverter = $toModelConverter;
         $this->reviewResource = $reviewResource;
         $this->storeManager = $storeManager;
-        $this->ratingFactory = $ratingFactory;
+        $this->ratingSaveHandler = $ratingSaveHandler;
     }
 
     /**
      * @inheritdoc
+     *
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
      */
     public function execute($dataModel)
     {
@@ -106,17 +106,12 @@ class Save implements SaveInterface
         $this->reviewResource->save($model);
         $this->reviewResource->load($model, $model->getId());
 
-        // at this point we SHOULD have in any CASE a REVIEW
-        $reviewRatings = $dataModel->getRatings();
-        if (count($reviewRatings)) { // make sure we have ratings
-          foreach ($reviewRatings as $ratingVote) { // looping all ratings
-            $this->ratingFactory->create()
-              ->setRatingId($ratingVote->getId())
-              ->setReviewId($model->getId())
-              ->addOptionVote( $ratingVote->getValue(), $model->getEntityPkValue() )
-              ->save();
-          }
+        if (null === $dataModel->getStoreId()) {
+            $dataModel->setStoreId($model->getStoreId());
         }
+
+        $dataModel->setId($model->getId());
+        $this->ratingSaveHandler->execute($dataModel);
 
         return $this->toDataModelConverter->toDataModel($model);
     }
